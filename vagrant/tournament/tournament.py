@@ -10,6 +10,17 @@ def connect():
     """Connect to the PostgreSQL database.  Returns a database connection."""
     return psycopg2.connect("dbname=tournament")
 
+def refreshViews():
+    """Refreshes views."""
+    conn = connect()
+    c = conn.cursor()
+    c.execute("REFRESH MATERIALIZED VIEW view_wins")
+    c.execute("REFRESH MATERIALIZED VIEW view_losses")
+    c.execute("REFRESH MATERIALIZED VIEW view_matches")
+    conn.commit()
+    conn.close
+
+
 
 def deleteMatches():
     """Remove all the match records from the database."""
@@ -18,6 +29,7 @@ def deleteMatches():
     c.execute("DELETE FROM matches")
     conn.commit()
     conn.close()
+    refreshViews()
 
 
 
@@ -28,6 +40,7 @@ def deletePlayers():
     c.execute("DELETE FROM players")
     conn.commit()
     conn.close()
+    refreshViews()
 
 
 def countPlayers():
@@ -35,8 +48,9 @@ def countPlayers():
     conn = connect()
     c = conn.cursor()
     c.execute("SELECT COUNT(*) as num_players FROM players")
-    conn.commit()
+    player_count = int(c.fetchone()[0])
     conn.close()
+    return player_count
 
 
 def registerPlayer(name):
@@ -51,6 +65,9 @@ def registerPlayer(name):
     conn = connect()
     c = conn.cursor()
     c.execute("INSERT INTO players (name) VALUES (%s)", (name,))
+    conn.commit()
+    conn.close()
+    refreshViews()
 
 
 def playerStandings():
@@ -66,6 +83,19 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
+    conn = connect()
+    c = conn.cursor()
+    query = """
+                SELECT players.player_id, players.name, 
+                    (SELECT COUNT(*) FROM matches WHERE players.player_id = matches.winner) AS wins,
+                    (SELECT COUNT(*) FROM matches WHERE players.player_id = matches.winner OR players.player_id = matches.loser) AS matches
+                FROM players
+                ORDER BY wins DESC;
+    """    
+    c.execute(query)
+    player_standings = c.fetchall()
+    conn.close()
+    return player_standings
 
 
 def reportMatch(winner, loser):
@@ -75,6 +105,13 @@ def reportMatch(winner, loser):
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
+    conn = connect()
+    c = conn.cursor()
+    c.execute("INSERT INTO matches(winner, loser) VALUES(%s,%s)", (int(winner),int(loser)))
+    conn.commit()
+    conn.close()
+    refreshViews()
+
  
  
 def swissPairings():

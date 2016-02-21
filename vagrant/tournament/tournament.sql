@@ -26,30 +26,35 @@ CREATE TABLE matches(
 	loser INTEGER REFERENCES players(player_id)
 );
 
--- ADD TEST PLAYERS
-INSERT INTO players(name) values('A');
-INSERT INTO players(name) values('B');
-INSERT INTO players(name) values('C');
-INSERT INTO players(name) values('D');
-INSERT INTO players(name) values('E');
-INSERT INTO players(name) values('F');
-INSERT INTO players(name) values('G');
-INSERT INTO players(name) values('H');
+-- -- ADD TEST PLAYERS
+-- INSERT INTO players(name) values('A');
+-- INSERT INTO players(name) values('B');
+-- INSERT INTO players(name) values('C');
+-- INSERT INTO players(name) values('D');
+-- INSERT INTO players(name) values('E');
+-- INSERT INTO players(name) values('F');
+-- INSERT INTO players(name) values('G');
+-- INSERT INTO players(name) values('H');
 
--- ADD TEST MATCHES
--- 3 rounds, 12 matches
-INSERT INTO matches(winner, loser) values(2, 1);
-INSERT INTO matches(winner, loser) values(3, 4);
-INSERT INTO matches(winner, loser) values(6, 5);
-INSERT INTO matches(winner, loser) values(7, 8);
-INSERT INTO matches(winner, loser) values(3, 2);
-INSERT INTO matches(winner, loser) values(6, 7);
-INSERT INTO matches(winner, loser) values(4, 1);
-INSERT INTO matches(winner, loser) values(8, 5);
-INSERT INTO matches(winner, loser) values(3, 6);
-INSERT INTO matches(winner, loser) values(7, 2);
-INSERT INTO matches(winner, loser) values(8, 4);
-INSERT INTO matches(winner, loser) values(5, 1);
+-- -- ADD TEST MATCHES
+-- -- 3 rounds, 12 matches
+-- -- ROUND 1:
+-- INSERT INTO matches(winner, loser) values(2, 1);
+-- INSERT INTO matches(winner, loser) values(3, 4);
+-- INSERT INTO matches(winner, loser) values(6, 5);
+-- INSERT INTO matches(winner, loser) values(7, 8);
+
+-- -- ROUND 2:
+-- INSERT INTO matches(winner, loser) values(3, 2);
+-- INSERT INTO matches(winner, loser) values(6, 7);
+-- INSERT INTO matches(winner, loser) values(4, 1);
+-- INSERT INTO matches(winner, loser) values(8, 5);
+
+-- -- ROUND 3:
+-- INSERT INTO matches(winner, loser) values(3, 6);
+-- INSERT INTO matches(winner, loser) values(7, 2);
+-- INSERT INTO matches(winner, loser) values(8, 4);
+-- INSERT INTO matches(winner, loser) values(5, 1);
 
 -- Create wins view as view_wins
 CREATE MATERIALIZED VIEW view_wins AS
@@ -61,8 +66,16 @@ CREATE MATERIALIZED VIEW view_wins AS
 
 -- Create losses view as view_losses
 CREATE MATERIALIZED VIEW view_losses AS
-	SELECT players.player_id AS player, count(matches.winner) AS losses
+	SELECT players.player_id AS player, count(matches.loser) AS losses
 		FROM players LEFT JOIN matches
 			ON players.player_id = matches.loser
 			GROUP BY players.player_id, matches.loser
 			ORDER BY players.player_id;
+
+-- Create matches view as view_matches
+CREATE MATERIALIZED VIEW view_matches AS
+	SELECT players.player_id AS player, count(matches) AS matches
+		FROM players LEFT JOIN matches
+			ON players.player_id = matches.winner OR players.player_id = matches.loser
+			GROUP BY players.player_id
+			ORDER BY players.player_id ASC
