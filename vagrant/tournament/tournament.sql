@@ -78,4 +78,11 @@ CREATE MATERIALIZED VIEW view_matches AS
 		FROM players LEFT JOIN matches
 			ON players.player_id = matches.winner OR players.player_id = matches.loser
 			GROUP BY players.player_id
-			ORDER BY players.player_id ASC
+			ORDER BY players.player_id ASC;
+
+-- Create matches view as view_standings
+CREATE MATERIALIZED VIEW view_standings AS
+	SELECT players.player_id, players.name, (SELECT COUNT(*) FROM matches WHERE players.player_id = matches.winner) AS wins,
+           (SELECT COUNT(*) FROM matches WHERE players.player_id = matches.winner OR players.player_id = matches.loser) AS matches
+            	FROM players
+                ORDER BY wins DESC;

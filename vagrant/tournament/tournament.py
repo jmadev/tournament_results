@@ -17,6 +17,7 @@ def refreshViews():
     c.execute("REFRESH MATERIALIZED VIEW view_wins")
     c.execute("REFRESH MATERIALIZED VIEW view_losses")
     c.execute("REFRESH MATERIALIZED VIEW view_matches")
+    c.execute("REFRESH MATERIALIZED VIEW view_standings")
     conn.commit()
     conn.close
 
@@ -129,5 +130,15 @@ def swissPairings():
         id2: the second player's unique id
         name2: the second player's name
     """
+    conn = connect()
+    c = conn.cursor()
+    c.execute("SELECT player_id, name from view_standings")
+    player_standings = c.fetchall()
+    pairings = []
+    num_players = countPlayers()
+    for players in range(0, num_players - 1, 2):
+        pairings.append(player_standings[players] + player_standings[players + 1])
+    conn.close()
+    return pairings
 
 

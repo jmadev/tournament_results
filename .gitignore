@@ -49,9 +49,12 @@ Temporary Items
 *.pyc
 
 vagrant/*
+!vagrant/pg_config.sh
+!vagrant/Vagrantfile
 !vagrant/tournament/
 
 vagrant/tournament/*
 !vagrant/tournament/tournament.py
 !vagrant/tournament/tournament.sql
 !vagrant/tournament/tournament_test.py
+!vagrant/tournament/README.md
