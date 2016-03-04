@@ -22,8 +22,8 @@ CREATE TABLE players(
 -- CREATE table matches
 CREATE TABLE matches(
 	match_id SERIAL PRIMARY KEY,
-	winner INTEGER REFERENCES players(player_id),
-	loser INTEGER REFERENCES players(player_id)
+	winner INTEGER REFERENCES players(player_id) ON DELETE CASCADE,
+	loser INTEGER REFERENCES players(player_id) ON DELETE CASCADE
 );
 
 -- -- ADD TEST PLAYERS
